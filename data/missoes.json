@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "nome": "Água da Manhã",
+    "dias": [1, 2, 3, 4, 5], 
+    "horario": "08:00",       
+    "assunto": "💧 Hora da água!",
+    "mensagem": "Beba 300ml agora e comece o dia hidratado!"
+  },
+  {
+    "id": 2,
+    "nome": "Exercício Noturno",
+    "dias": [1, 3, 5],
+    "horario": "19:30",
+    "assunto": "🏋️‍♂️ Hora do exercício!",
+    "mensagem": "Faça 20min de caminhada ou HIIT!"
+  }
+]
