@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "nome": "João Pereira",
+    "email": "joaopereiradesignfnx@gmail.com",
+    "peso_atual": 88,
+    "peso_meta": 75,
+    "dia_atual": 1,
+    "xp_total": 0,
+    "rank": "Aprendiz"
+  }
+]

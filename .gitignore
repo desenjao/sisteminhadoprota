@@ -26,3 +26,4 @@ out/
 
 # Testes
 coverage/
+/generated/prisma
