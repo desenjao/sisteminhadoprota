@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1,
+    "nome": "Perder 5kg",
+    "categoria": "corpo",
+    "prioridade": "alta",
+    "meta_final": "Perder 5kg em 2 meses",
+    "motivacao": "Melhorar saúde e disposição",
+    "progresso": 0,
+    "data_criacao": "2025-10-07T16:27:10.983Z",
+    "ativo": true
+  },
+  {
+    "id": 2,
+    "nome": "Aprender Node.js em 1 mês",
+    "categoria": "trabalho",
+    "prioridade": "alta",
+    "meta_final": "Criar uma API REST completa",
+    "motivacao": "Melhorar minhas skills de backend",
+    "progresso": 0,
+    "data_criacao": "2025-10-07T17:51:14.951Z",
+    "ativo": true
+  },
+  {
+    "id": 3,
+    "nome": "Aprender Node.js básico",
+    "categoria": "trabalho",
+    "prioridade": "media",
+    "meta_final": "Entender conceitos fundamentais",
+    "motivacao": "Crescer profissionalmente",
+    "progresso": 0,
+    "data_criacao": "2025-10-07T17:54:53.650Z",
+    "ativo": true
+  },
+  {
+    "id": 4,
+    "nome": "Aprender Node.js básico",
+    "categoria": "trabalho",
+    "prioridade": "media",
+    "meta_final": "Entender conceitos fundamentais",
+    "motivacao": "Crescer profissionalmente",
+    "progresso": 0,
+    "data_criacao": "2025-10-07T18:01:25.145Z",
+    "ativo": true
+  }
+]

@@ -7,6 +7,10 @@
     "peso_meta": 75,
     "dia_atual": 1,
     "xp_total": 0,
-    "rank": "Aprendiz"
+    "rank": "Aprendiz",
+    "missoesConcluidas": 0,
+    "missoesTotais": 13,
+    "progressoGeral": 0,
+    "ultimaAtualizacao": "2025-10-07T18:01:31.312Z"
   }
 ]
