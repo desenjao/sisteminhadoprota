@@ -3,21 +3,22 @@ const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
 const cors = require('cors');
-require('dotenv').config(); // Carregar variáveis de ambiente
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data.json');
 
-// Importar o módulo de IA (que vamos criar)
+// Importar o gerador de IA
 const IAGenerator = require('./ia.js');
+const iaGenerator = new IAGenerator();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Inicializar dados se o arquivo não existir
+// Inicializar dados
 async function initializeData() {
   try {
     await fs.access(DATA_FILE);
@@ -31,7 +32,7 @@ async function initializeData() {
   }
 }
 
-// Ler dados do arquivo
+// Ler dados
 async function readData() {
   try {
     const data = await fs.readFile(DATA_FILE, 'utf8');
@@ -42,7 +43,7 @@ async function readData() {
   }
 }
 
-// Salvar dados no arquivo
+// Salvar dados
 async function saveData(data) {
   try {
     await fs.writeFile(DATA_FILE, JSON.stringify(data, null, 2));
@@ -51,247 +52,89 @@ async function saveData(data) {
   }
 }
 
-// Inicializar o gerador de IA
-const iaGenerator = new IAGenerator();
-
-// Página inicial
+// Página inicial - servir index.html da pasta front/index
 app.get('/', (req, res) => {
-  const html = `
-  <!DOCTYPE html>
-  <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sisteminha do Prota</title>
-    <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+  const indexPath = path.join(__dirname, 'front',  'index.html');
+  
+  // Enviar o arquivo index.html
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      console.error('Erro ao carregar index.html:', err.message);
       
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        min-height: 100vh;
-        padding: 20px;
-      }
-      
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 40px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      }
-      
-      header {
-        text-align: center;
-        margin-bottom: 40px;
-      }
-      
-      h1 {
-        font-size: 3rem;
-        margin-bottom: 10px;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-      }
-      
-      .tagline {
-        font-size: 1.2rem;
-        opacity: 0.9;
-        margin-bottom: 30px;
-      }
-      
-      .sections {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        margin-bottom: 40px;
-      }
-      
-      .section {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 25px;
-        border-radius: 15px;
-        backdrop-filter: blur(5px);
-      }
-      
-      h2 {
-        margin-bottom: 15px;
-        color: #ffd700;
-        font-size: 1.5rem;
-      }
-      
-      ul {
-        list-style-position: inside;
-        margin-left: 10px;
-      }
-      
-      li {
-        margin-bottom: 8px;
-        opacity: 0.9;
-      }
-      
-      .api-info {
-        background: rgba(0, 0, 0, 0.2);
-        padding: 25px;
-        border-radius: 15px;
-        margin-top: 30px;
-      }
-      
-      code {
-        background: rgba(0, 0, 0, 0.3);
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-family: 'Courier New', monospace;
-      }
-      
-      .endpoint {
-        margin: 10px 0;
-        padding: 10px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        font-family: 'Courier New', monospace;
-      }
-      
-      .philosophy {
-        text-align: center;
-        font-style: italic;
-        margin-top: 40px;
-        padding: 20px;
-        border-top: 1px solid rgba(255, 255, 255, 0.2);
-        font-size: 1.1rem;
-        opacity: 0.9;
-      }
-      
-      .ia-status {
-        text-align: center;
-        margin-top: 20px;
-        padding: 15px;
-        background: ${iaGenerator.useRealAI ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 165, 0, 0.1)'};
-        border-radius: 10px;
-        border: 1px solid ${iaGenerator.useRealAI ? '#0f0' : '#ffa500'};
-      }
-      
-      @media (max-width: 600px) {
-        .container {
-          padding: 20px;
-        }
-        
-        h1 {
-          font-size: 2rem;
-        }
-        
-        .sections {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <header>
-        <h1>🧠 Sisteminha do Prota</h1>
-        <p class="tagline">Transformando objetivos grandes em pequenas tarefas possíveis</p>
-      </header>
-      
-      <div class="ia-status">
-        <strong>🤖 Status da IA:</strong> 
-        ${iaGenerator.useRealAI ? 
-          '✅ DeepSeek (HuggingFace) CONECTADO' : 
-          '⚠️ IA Simulada (adicione HF_TOKEN no .env)'}
-      </div>
-      
-      <div class="sections">
-        <div class="section">
-          <h2>🎯 Propósito</h2>
-          <p>Para pessoas que trabalham, chegam cansadas e precisam continuar projetos pessoais sem pressão.</p>
-          <ul>
-            <li>Tarefas de até 30 minutos</li>
-            <li>Progresso sem culpa</li>
-            <li>Recompensas por completar</li>
-            <li>Sem penalidades</li>
-          </ul>
-        </div>
-        
-        <div class="section">
-          <h2>✨ Princípios</h2>
-          <ul>
-            <li>Fazer pouco ainda é progresso</li>
-            <li>Sistema para dias cansados</li>
-            <li>Foco na continuidade</li>
-            <li>Sem perfeccionismo</li>
-            <li>Apenas reforço positivo</li>
-          </ul>
-        </div>
-      </div>
-      
-      <div class="api-info">
-        <h2>🚀 API Disponível</h2>
-        <p>O servidor está rodando na porta ${PORT}. Use as seguintes rotas:</p>
-        
-        <div class="endpoint">
-          <code>GET /health</code> - Status do servidor
-        </div>
-        
-        <div class="endpoint">
-          <code>POST /objectives</code> - Criar novo objetivo
-        </div>
-        
-        <div class="endpoint">
-          <code>GET /objectives</code> - Listar objetivos
-        </div>
-        
-        <div class="endpoint">
-          <code>POST /objectives/:id/generate-tasks</code> - Gerar tarefas com IA
-        </div>
-        
-        <div class="endpoint">
-          <code>GET /tasks</code> - Listar tarefas
-        </div>
-        
-        <div class="endpoint">
-          <code>PATCH /tasks/:id/done</code> - Marcar tarefa como concluída
-        </div>
-        
-        <div class="endpoint">
-          <code>GET /points</code> - Ver pontuação
-        </div>
-      </div>
-      
-      <div class="philosophy">
-        "O sistema existe para funcionar em dias cansados.<br>
-        Fazer pouco ainda é progresso."
-      </div>
-    </div>
-    
-    <script>
-      // Exemplo simples de uso da API
-      async function checkHealth() {
-        try {
-          const response = await fetch('/health');
-          if (response.ok) {
-            console.log('✅ Servidor está ativo e funcionando!');
-          }
-        } catch (error) {
-          console.log('⚠️ Servidor em inicialização...');
-        }
-      }
-      
-      // Verificar saúde do servidor após carregar a página
-      window.addEventListener('load', () => {
-        setTimeout(checkHealth, 1000);
-      });
-    </script>
-  </body>
-  </html>
-  `;
-  res.send(html);
+      // Se não encontrar, criar uma mensagem de erro amigável
+      res.status(404).send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Sisteminha do Prota - Arquivo não encontrado</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              padding: 20px;
+            }
+            .error-container {
+              background: rgba(255, 255, 255, 0.1);
+              backdrop-filter: blur(10px);
+              padding: 40px;
+              border-radius: 20px;
+              text-align: center;
+              max-width: 600px;
+              box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            }
+            h1 {
+              color: #ffd700;
+              margin-bottom: 20px;
+            }
+            code {
+              background: rgba(0, 0, 0, 0.3);
+              padding: 10px;
+              border-radius: 5px;
+              display: block;
+              margin: 20px 0;
+              font-family: 'Courier New', monospace;
+            }
+            a {
+              color: #ffd700;
+              text-decoration: none;
+              font-weight: bold;
+            }
+            a:hover {
+              text-decoration: underline;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="error-container">
+            <h1>📁 Arquivo não encontrado</h1>
+            <p>O arquivo index.html não foi encontrado em:</p>
+            <code>${indexPath}</code>
+            <p>Por favor, crie a seguinte estrutura de pastas:</p>
+            <code>
+              seu-projeto/<br>
+              ├── front/<br>
+              │   └── index/<br>
+              │       └── index.html<br>
+              └── server.js
+            </code>
+            <p>Ou altere a rota no server.js para apontar para o local correto.</p>
+            <p><a href="/health">🔍 Verificar status do servidor</a></p>
+          </div>
+        </body>
+        </html>
+      `);
+    }
+  });
 });
 
+// Servir arquivos estáticos
+app.use('/static', express.static(path.join(__dirname, 'front')));
+app.use('/static', express.static(path.join(__dirname, 'front', 'index')));
 // Rota de saúde
 app.get('/health', (req, res) => {
   res.json({ 
@@ -319,7 +162,7 @@ app.post('/objectives', async (req, res) => {
       title,
       description,
       createdAt: new Date().toISOString(),
-      tasks: []
+      tasksGenerated: false
     };
     
     data.objectives.push(objective);
@@ -332,37 +175,13 @@ app.post('/objectives', async (req, res) => {
   }
 });
 
-// Listar todos os objetivos
+// Listar objetivos
 app.get('/objectives', async (req, res) => {
   try {
     const data = await readData();
     res.json(data.objectives);
   } catch (error) {
     console.error('Erro ao listar objetivos:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
-
-// Obter um objetivo específico com suas tarefas
-app.get('/objectives/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const data = await readData();
-    
-    const objective = data.objectives.find(obj => obj.id === parseInt(id));
-    
-    if (!objective) {
-      return res.status(404).json({ error: 'Objetivo não encontrado' });
-    }
-    
-    const tasks = data.tasks.filter(task => task.objectiveId === parseInt(id));
-    
-    res.json({
-      ...objective,
-      tasks
-    });
-  } catch (error) {
-    console.error('Erro ao buscar objetivo:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
@@ -379,41 +198,43 @@ app.post('/objectives/:id/generate-tasks', async (req, res) => {
       return res.status(404).json({ error: 'Objetivo não encontrado' });
     }
     
-    // Verificar se já existem tarefas para este objetivo
+    // Verificar se já existem tarefas
     const existingTasks = data.tasks.filter(task => task.objectiveId === parseInt(id));
     if (existingTasks.length > 0) {
       return res.status(400).json({ 
-        error: 'Este objetivo já possui tarefas geradas',
+        error: 'Este objetivo já possui tarefas',
         tasks: existingTasks
       });
     }
     
-    // ⭐ ALTERAÇÃO CRÍTICA: Usar o módulo de IA ⭐
-    const generatedTasks = await iaGenerator.generateTasks({
-      title: objective.title,
-      description: objective.description
-    });
+    // Gerar tarefas com IA
+    const prompt = `${objective.title}: ${objective.description}`;
+    const generatedTasks = await iaGenerator.generateTasks(prompt);
     
-    // Formatar as tarefas geradas para o formato do sistema
+    // Formatar tarefas
     const formattedTasks = generatedTasks.map((task, index) => ({
       id: Date.now() + index + 1,
       title: task.title,
       description: task.description,
-      estimatedTime: task.estimatedTime || 15, // Default 15min se não tiver
+      estimatedTime: task.estimatedTime || 15,
       status: "pending",
       objectiveId: parseInt(id),
       createdAt: new Date().toISOString()
     }));
     
-    // Adicionar as tarefas ao banco de dados
+    // Adicionar ao banco
     formattedTasks.forEach(task => {
       data.tasks.push(task);
     });
     
+    // Marcar objetivo como processado
+    objective.tasksGenerated = true;
+    objective.generatedAt = new Date().toISOString();
+    
     await saveData(data);
     
     res.status(201).json({
-      message: `Foram geradas ${formattedTasks.length} tarefas para o objetivo`,
+      message: `Geradas ${formattedTasks.length} tarefas`,
       tasks: formattedTasks,
       iaSource: iaGenerator.useRealAI ? 'DeepSeek (HuggingFace)' : 'IA Simulada',
       objectiveId: parseInt(id)
@@ -422,34 +243,28 @@ app.post('/objectives/:id/generate-tasks', async (req, res) => {
   } catch (error) {
     console.error('Erro ao gerar tarefas:', error);
     res.status(500).json({ 
-      error: 'Erro interno do servidor',
-      details: error.message,
-      iaSource: iaGenerator.useRealAI ? 'DeepSeek' : 'IA Simulada'
+      error: 'Erro ao gerar tarefas',
+      details: error.message
     });
   }
 });
 
-// Listar tarefas com filtros
+// Listar todas as tarefas
 app.get('/tasks', async (req, res) => {
   try {
-    const { status, objectiveId } = req.query;
     const data = await readData();
     
-    let tasks = [...data.tasks];
+    // Agrupar tarefas por objetivo
+    const tasksByObjective = data.objectives.map(obj => ({
+      objective: obj,
+      tasks: data.tasks.filter(task => task.objectiveId === obj.id)
+    }));
     
-    // Aplicar filtros
-    if (status) {
-      tasks = tasks.filter(task => task.status === status);
-    }
-    
-    if (objectiveId) {
-      tasks = tasks.filter(task => task.objectiveId === parseInt(objectiveId));
-    }
-    
-    // Ordenar por data de criação (mais recentes primeiro)
-    tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    
-    res.json(tasks);
+    res.json({
+      totalTasks: data.tasks.length,
+      tasksByObjective,
+      allTasks: data.tasks
+    });
   } catch (error) {
     console.error('Erro ao listar tarefas:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
@@ -462,133 +277,75 @@ app.patch('/tasks/:id/done', async (req, res) => {
     const { id } = req.params;
     const data = await readData();
     
-    const taskIndex = data.tasks.findIndex(task => task.id === parseInt(id));
+    const task = data.tasks.find(t => t.id === parseInt(id));
     
-    if (taskIndex === -1) {
+    if (!task) {
       return res.status(404).json({ error: 'Tarefa não encontrada' });
     }
     
-    const task = data.tasks[taskIndex];
-    
     if (task.status === 'done') {
-      return res.status(400).json({ error: 'Tarefa já está concluída' });
+      return res.status(400).json({ error: 'Tarefa já concluída' });
     }
     
-    // Marcar como concluída
+    // Atualizar status
     task.status = 'done';
     task.completedAt = new Date().toISOString();
     
-    // Adicionar pontos (simples: 10 pontos por tarefa)
-    const pointsToAdd = 10;
-    data.points += pointsToAdd;
+    // Adicionar pontos
+    data.points += 10;
     
     await saveData(data);
     
     res.json({
-      message: 'Tarefa marcada como concluída!',
-      pointsAdded: pointsToAdd,
-      totalPoints: data.points,
-      task
+      message: 'Tarefa concluída! +10 pontos',
+      task,
+      totalPoints: data.points
     });
+    
   } catch (error) {
-    console.error('Erro ao marcar tarefa como concluída:', error);
+    console.error('Erro ao marcar tarefa:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
-// Reverter tarefa concluída (opcional)
-app.patch('/tasks/:id/undo', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const data = await readData();
-    
-    const taskIndex = data.tasks.findIndex(task => task.id === parseInt(id));
-    
-    if (taskIndex === -1) {
-      return res.status(404).json({ error: 'Tarefa não encontrada' });
-    }
-    
-    const task = data.tasks[taskIndex];
-    
-    if (task.status === 'pending') {
-      return res.status(400).json({ error: 'Tarefa já está pendente' });
-    }
-    
-    // Reverter para pendente
-    task.status = 'pending';
-    delete task.completedAt;
-    
-    // Remover pontos
-    const pointsToRemove = 10;
-    data.points = Math.max(0, data.points - pointsToRemove);
-    
-    await saveData(data);
-    
-    res.json({
-      message: 'Tarefa revertida para pendente',
-      pointsRemoved: pointsToRemove,
-      totalPoints: data.points,
-      task
-    });
-  } catch (error) {
-    console.error('Erro ao reverter tarefa:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
-  }
-});
-
-// Obter pontuação total
+// Obter pontuação
 app.get('/points', async (req, res) => {
   try {
     const data = await readData();
-    res.json({ 
+    
+    const completedTasks = data.tasks.filter(t => t.status === 'done');
+    const totalEstimatedTime = completedTasks.reduce((sum, task) => sum + (task.estimatedTime || 0), 0);
+    
+    res.json({
       points: data.points,
-      message: `Você tem ${data.points} pontos! Continue assim!`,
-      objectivesCompleted: data.tasks.filter(t => t.status === 'done').length
+      completedTasks: completedTasks.length,
+      totalTasks: data.tasks.length,
+      totalTimeInvested: totalEstimatedTime,
+      message: `🎉 Você investiu ${totalEstimatedTime} minutos em seu crescimento!`
     });
   } catch (error) {
-    console.error('Erro ao obter pontuação:', error);
+    console.error('Erro ao obter pontos:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 });
 
-// Middleware para rotas não encontradas
-app.use((req, res) => {
-  res.status(404).json({
-    error: 'Rota não encontrada',
-    message: 'Consulte a documentação em / para ver as rotas disponíveis'
-  });
-});
-
-// Inicializar e iniciar servidor
+// Iniciar servidor
 async function startServer() {
   await initializeData();
   
   app.listen(PORT, () => {
     console.log(`
     🚀 Sisteminha do Prota iniciado!
-    
     🌐 Acesse: http://localhost:${PORT}
     
     🤖 Status IA: ${iaGenerator.useRealAI ? 'DeepSeek (HuggingFace) ✅' : 'IA Simulada ⚠️'}
+    ${!iaGenerator.useRealAI ? 
+      '\n   ⚠️  Adicione HF_TOKEN no arquivo .env para usar IA real:' +
+      '\n   HF_TOKEN=sua_chave_aqui' +
+      '\n   🔗 https://huggingface.co/settings/tokens' : 
+      ''}
     
-    📊 Rotas disponíveis:
-    GET  /                    - Página inicial
-    GET  /health             - Status do servidor
-    POST /objectives         - Criar objetivo
-    GET  /objectives         - Listar objetivos
-    GET  /objectives/:id     - Obter objetivo específico
-    POST /objectives/:id/generate-tasks - Gerar tarefas com IA
-    GET  /tasks              - Listar tarefas
-    PATCH /tasks/:id/done    - Marcar tarefa como concluída
-    PATCH /tasks/:id/undo    - Reverter tarefa
-    GET  /points             - Ver pontuação
-    
-    🔧 Configuração IA: ${iaGenerator.useRealAI ? 
-      'HF_TOKEN configurado no .env' : 
-      'Adicione HF_TOKEN no .env para usar DeepSeek'}
-    
-    💡 Lembrete: O sistema existe para funcionar em dias cansados.
-                 Fazer pouco ainda é progresso.
+    💡 Dica: Acesse a página inicial para criar objetivos e gerar tarefas!
     `);
   });
 }

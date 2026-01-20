@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sisteminha do Prota</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-color: #ffd700;
+            --success-color: #4ade80;
+            --warning-color: #fbbf24;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-border: rgba(255, 255, 255, 0.2);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--primary-gradient);
+            color: white;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--accent-color), #ffed4e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--card-border);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        /* IA Status */
+        .ia-status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .ia-status.real {
+            border-left-color: var(--success-color);
+        }
+        
+        .ia-status.simulated {
+            border-left-color: var(--warning-color);
+        }
+        
+        /* Main Content Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Form Section */
+        .form-section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--card-border);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            color: #333;
+            transition: all 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+            background: white;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* Buttons */
+        .btn {
+            background: var(--accent-color);
+            color: #333;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-primary {
+            background: var(--accent-color);
+            color: #333;
+        }
+        
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        
+        /* Objectives Section */
+        .objectives-section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--card-border);
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--card-border);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            color: var(--accent-color);
+        }
+        
+        /* Cards */
+        .objective-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid var(--card-border);
+            transition: all 0.3s;
+        }
+        
+        .objective-card:hover {
+            border-color: var(--accent-color);
+            transform: translateX(5px);
+        }
+        
+        .objective-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .objective-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .objective-date {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .objective-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        /* Tasks Section */
+        .tasks-section {
+            grid-column: 1 / -1;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--card-border);
+        }
+        
+        .task-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .task-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid var(--card-border);
+            transition: all 0.3s;
+        }
+        
+        .task-card.pending {
+            border-left: 4px solid var(--warning-color);
+        }
+        
+        .task-card.done {
+            border-left: 4px solid var(--success-color);
+            opacity: 0.8;
+        }
+        
+        .task-card.done .task-title {
+            text-decoration: line-through;
+        }
+        
+        .task-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .task-description {
+            opacity: 0.9;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        
+        .task-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .task-time {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        
+        .task-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1001;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.error {
+            background: #ef4444;
+        }
+        
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            opacity: 0.7;
+        }
+        
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+            opacity: 0.7;
+            font-style: italic;
+            border-top: 1px solid var(--card-border);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .task-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .objective-actions {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-bar {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .form-section, .objectives-section, .tasks-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <h1>🧠 Sisteminha do Prota</h1>
+            <p class="tagline">Transformando objetivos grandes em pequenas tarefas possíveis</p>
+            <div id="iaStatus" class="ia-status simulated">
+                <strong>🤖 Status da IA:</strong> Carregando...
+            </div>
+        </header>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-value" id="totalPoints">0</div>
+                <div>Pontos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalObjectives">0</div>
+                <div>Objetivos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalTasks">0</div>
+                <div>Tarefas</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="completedTasks">0</div>
+                <div>Concluídas</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Create Objective Form -->
+            <section class="form-section">
+                <h2>🎯 Criar Novo Objetivo</h2>
+                <div class="form-group">
+                    <label for="objectiveTitle">Título:</label>
+                    <input type="text" id="objectiveTitle" placeholder="Ex: Criar um portfólio online" required>
+                </div>
+                <div class="form-group">
+                    <label for="objectiveDescription">Descrição:</label>
+                    <textarea id="objectiveDescription" placeholder="Descreva seu objetivo com detalhes..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="createObjective()" id="createBtn">
+                    <span>🚀 Criar Objetivo</span>
+                </button>
+            </section>
+
+            <!-- Objectives List -->
+            <section class="objectives-section">
+                <div class="section-title">
+                    <h2>📋 Meus Objetivos</h2>
+                    <button class="btn btn-small" onclick="loadObjectives()">
+                        <span>🔄 Atualizar</span>
+                    </button>
+                </div>
+                <div id="objectivesList" class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <p>Nenhum objetivo criado ainda.</p>
+                    <p>Crie seu primeiro objetivo!</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Tasks Section -->
+        <section class="tasks-section">
+            <div class="section-title">
+                <h2>✅ Minhas Tarefas</h2>
+                <div>
+                    <button class="btn btn-small" onclick="filterTasks('all')">
+                        <span>Todas</span>
+                    </button>
+                    <button class="btn btn-small btn-success" onclick="filterTasks('done')">
+                        <span>Concluídas</span>
+                    </button>
+                    <button class="btn btn-small btn-warning" onclick="filterTasks('pending')">
+                        <span>Pendentes</span>
+                    </button>
+                </div>
+            </div>
+            <div id="tasksList" class="task-grid empty-state">
+                <div class="empty-state-icon">📝</div>
+                <p>Nenhuma tarefa disponível.</p>
+                <p>Crie um objetivo e gere tarefas com IA!</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>"O sistema existe para funcionar em dias cansados. Fazer pouco ainda é progresso."</p>
+            <p><small>Sisteminha do Prota | IA Powered by DeepSeek</small></p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toastMessage">Mensagem</span>
+    </div>
+
+    <!-- Modal for Task Generation -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <h2>🎯 Gerando Tarefas com IA</h2>
+            <p id="modalMessage">Processando seu objetivo com IA...</p>
+            <div id="generatedTasks"></div>
+            <div class="objective-actions" style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="closeModal()">
+                    <span>Fechar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado da aplicação
+        let state = {
+            objectives: [],
+            tasks: [],
+            points: 0,
+            iaStatus: 'carregando',
+            currentFilter: 'all'
+        };
+
+        // Elementos do DOM
+        const elements = {
+            iaStatus: document.getElementById('iaStatus'),
+            totalPoints: document.getElementById('totalPoints'),
+            totalObjectives: document.getElementById('totalObjectives'),
+            totalTasks: document.getElementById('totalTasks'),
+            completedTasks: document.getElementById('completedTasks'),
+            objectivesList: document.getElementById('objectivesList'),
+            tasksList: document.getElementById('tasksList'),
+            toast: document.getElementById('toast'),
+            toastMessage: document.getElementById('toastMessage'),
+            taskModal: document.getElementById('taskModal'),
+            modalMessage: document.getElementById('modalMessage'),
+            generatedTasks: document.getElementById('generatedTasks')
+        };
+
+        // Utilitários
+        function showToast(message, isError = false) {
+            elements.toastMessage.textContent = message;
+            elements.toast.className = 'toast' + (isError ? ' error' : '');
+            elements.toast.classList.add('show');
+            
+            setTimeout(() => {
+                elements.toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function setLoading(element, isLoading) {
+            if (isLoading) {
+                element.classList.add('loading');
+                const originalText = element.innerHTML;
+                element.setAttribute('data-original-text', originalText);
+                element.innerHTML = '<span class="spinner"></span> Processando...';
+            } else {
+                element.classList.remove('loading');
+                const originalText = element.getAttribute('data-original-text');
+                if (originalText) {
+                    element.innerHTML = originalText;
+                }
+            }
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // API Functions
+        async function checkHealth() {
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                elements.iaStatus.textContent = `🤖 Status da IA: ${data.iaStatus}`;
+                elements.iaStatus.className = `ia-status ${data.iaStatus.includes('DeepSeek') ? 'real' : 'simulated'}`;
+                
+                return data;
+            } catch (error) {
+                elements.iaStatus.textContent = '🤖 Status da IA: Erro de conexão';
+                elements.iaStatus.className = 'ia-status simulated';
+                throw error;
+            }
+        }
+
+        async function createObjective() {
+            const title = document.getElementById('objectiveTitle').value;
+            const description = document.getElementById('objectiveDescription').value;
+            const createBtn = document.getElementById('createBtn');
+
+            if (!title.trim()) {
+                showToast('Por favor, insira um título para o objetivo', true);
+                return;
+            }
+
+            setLoading(createBtn, true);
+
+            try {
+                const response = await fetch('/objectives', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, description })
+                });
+
+                const objective = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(objective.error || 'Erro ao criar objetivo');
+                }
+
+                showToast(`✅ Objetivo "${title}" criado com sucesso!`);
+                
+                // Limpar formulário
+                document.getElementById('objectiveTitle').value = '';
+                document.getElementById('objectiveDescription').value = '';
+                
+                // Carregar objetivos atualizados
+                await loadObjectives();
+                
+                // Gerar tarefas automaticamente
+                await generateTasks(objective.id);
+                
+            } catch (error) {
+                console.error('Erro ao criar objetivo:', error);
+                showToast(`❌ Erro: ${error.message}`, true);
+            } finally {
+                setLoading(createBtn, false);
+            }
+        }
+
+        async function loadObjectives() {
+            try {
+                const response = await fetch('/objectives');
+                state.objectives = await response.json();
+                
+                updateObjectivesDisplay();
+                updateStats();
+                
+            } catch (error) {
+                console.error('Erro ao carregar objetivos:', error);
+                showToast('Erro ao carregar objetivos', true);
+            }
+        }
+
+        function updateObjectivesDisplay() {
+            const container = elements.objectivesList;
+            
+            if (state.objectives.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>Nenhum objetivo criado ainda.</p>
+                        <p>Crie seu primeiro objetivo!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            
+            state.objectives.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).forEach(obj => {
+                const objectiveElement = document.createElement('div');
+                objectiveElement.className = 'objective-card';
+                objectiveElement.innerHTML = `
+                    <div class="objective-header">
+                        <div>
+                            <div class="objective-title">${obj.title}</div>
+                            <div class="objective-date">Criado em: ${formatDate(obj.createdAt)}</div>
+                        </div>
+                        <div class="objective-status">
+                            ${obj.tasksGenerated ? '✅ Tarefas geradas' : '⏳ Aguardando tarefas'}
+                        </div>
+                    </div>
+                    <p>${obj.description}</p>
+                    <div class="objective-actions">
+                        ${!obj.tasksGenerated ? `
+                            <button class="btn btn-small" onclick="generateTasks(${obj.id})">
+                                <span>🤖 Gerar Tarefas com IA</span>
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-small btn-success" onclick="viewObjectiveTasks(${obj.id})">
+                            <span>📋 Ver Tarefas</span>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(objectiveElement);
+            });
+        }
+
+        async function generateTasks(objectiveId) {
+            const objective = state.objectives.find(obj => obj.id === objectiveId);
+            if (!objective) return;
+
+            elements.modalMessage.textContent = `Gerando tarefas para: "${objective.title}"`;
+            elements.generatedTasks.innerHTML = '<div class="spinner" style="margin: 20px auto;"></div>';
+            elements.taskModal.style.display = 'flex';
+
+            try {
+                const response = await fetch(`/objectives/${objectiveId}/generate-tasks`, {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Erro ao gerar tarefas');
+                }
+
+                elements.generatedTasks.innerHTML = `
+                    <p>✅ ${result.message}</p>
+                    <div style="margin-top: 20px;">
+                        <h3>Tarefas Geradas:</h3>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            ${result.tasks.map(task => `
+                                <li style="margin-bottom: 10px;">
+                                    <strong>${task.title}</strong><br>
+                                    <small>${task.description}</small><br>
+                                    <small>⏱️ ${task.estimatedTime} min</small>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+
+                showToast(`✅ ${result.tasks.length} tarefas geradas com sucesso!`);
+                
+                // Atualizar lista de objetivos e tarefas
+                await Promise.all([loadObjectives(), loadTasks()]);
+                
+            } catch (error) {
+                console.error('Erro ao gerar tarefas:', error);
+                elements.generatedTasks.innerHTML = `
+                    <p style="color: #ef4444;">❌ Erro: ${error.message}</p>
+                    <p>Tente novamente ou verifique o status da IA.</p>
+                `;
+                showToast(`❌ Erro ao gerar tarefas: ${error.message}`, true);
+            }
+        }
+
+        function closeModal() {
+            elements.taskModal.style.display = 'none';
+        }
+
+        async function loadTasks() {
+            try {
+                const response = await fetch('/tasks');
+                const data = await response.json();
+                
+                state.tasks = data.allTasks || [];
+                updateTasksDisplay();
+                updateStats();
+                
+            } catch (error) {
+                console.error('Erro ao carregar tarefas:', error);
+                showToast('Erro ao carregar tarefas', true);
+            }
+        }
+
+        function updateTasksDisplay() {
+            const container = elements.tasksList;
+            
+            let filteredTasks = state.tasks;
+            
+            if (state.currentFilter === 'done') {
+                filteredTasks = state.tasks.filter(task => task.status === 'done');
+            } else if (state.currentFilter === 'pending') {
+                filteredTasks = state.tasks.filter(task => task.status === 'pending');
+            }
+            
+            if (filteredTasks.length === 0) {
+                let message = '';
+                if (state.currentFilter === 'done') {
+                    message = 'Nenhuma tarefa concluída ainda. Complete suas primeiras tarefas!';
+                } else if (state.currentFilter === 'pending') {
+                    message = 'Todas as tarefas estão concluídas! 🎉 Crie um novo objetivo.';
+                } else {
+                    message = 'Nenhuma tarefa disponível. Crie um objetivo e gere tarefas com IA!';
+                }
+                
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">${state.currentFilter === 'done' ? '🎉' : '📝'}</div>
+                        <p>${message}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            
+            filteredTasks.sort((a, b) => {
+                // Ordenar por status (pendentes primeiro) e depois por data
+                if (a.status !== b.status) {
+                    return a.status === 'pending' ? -1 : 1;
+                }
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            }).forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = `task-card ${task.status}`;
+                taskElement.innerHTML = `
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-description">${task.description}</div>
+                    <div class="task-meta">
+                        <div class="task-time">⏱️ ${task.estimatedTime || 15} min</div>
+                        <div>🎯 Objetivo #${task.objectiveId}</div>
+                    </div>
+                    <div class="task-actions">
+                        ${task.status === 'pending' ? `
+                            <button class="btn btn-small btn-success" onclick="markTaskDone(${task.id})">
+                                <span>✅ Concluir</span>
+                            </button>
+                        ` : `
+                            <div style="color: var(--success-color); font-weight: bold;">
+                                ✅ Concluída em ${formatDate(task.completedAt)}
+                            </div>
+                        `}
+                    </div>
+                `;
+                container.appendChild(taskElement);
+            });
+        }
+
+        function filterTasks(filter) {
+            state.currentFilter = filter;
+            updateTasksDisplay();
+            
+            // Atualizar botões ativos
+            document.querySelectorAll('.tasks-section .btn-small').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Marcar botão atual como ativo
+            const activeBtn = document.querySelector(`.tasks-section .btn-small:nth-child(${filter === 'all' ? 1 : filter === 'done' ? 2 : 3})`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+            }
+        }
+
+        async function markTaskDone(taskId) {
+            try {
+                const response = await fetch(`/tasks/${taskId}/done`, {
+                    method: 'PATCH'
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Erro ao marcar tarefa');
+                }
+
+                showToast(`✅ Tarefa concluída! +${result.pointsAdded || 10} pontos`);
+                
+                // Atualizar tarefas e estatísticas
+                await Promise.all([loadTasks(), updateStats()]);
+                
+            } catch (error) {
+                console.error('Erro ao marcar tarefa:', error);
+                showToast(`❌ Erro: ${error.message}`, true);
+            }
+        }
+
+        async function updateStats() {
+            try {
+                // Atualizar pontos
+                const pointsResponse = await fetch('/points');
+                const pointsData = await pointsResponse.json();
+                
+                state.points = pointsData.points;
+                elements.totalPoints.textContent = state.points;
+                
+                // Atualizar contadores
+                elements.totalObjectives.textContent = state.objectives.length;
+                elements.totalTasks.textContent = state.tasks.length;
+                elements.completedTasks.textContent = state.tasks.filter(t => t.status === 'done').length;
+                
+            } catch (error) {
+                console.error('Erro ao atualizar estatísticas:', error);
+            }
+        }
+
+        function viewObjectiveTasks(objectiveId) {
+            // Filtrar tarefas por objetivo e atualizar display
+            const objectiveTasks = state.tasks.filter(task => task.objectiveId === objectiveId);
+            
+            if (objectiveTasks.length === 0) {
+                showToast('Este objetivo ainda não possui tarefas geradas', true);
+                return;
+            }
+            
+            // Mostrar apenas tarefas deste objetivo
+            const originalTasks = state.tasks;
+            state.tasks = objectiveTasks;
+            state.currentFilter = 'all';
+            updateTasksDisplay();
+            
+            // Botão para voltar
+            const backButton = document.createElement('button');
+            backButton.className = 'btn btn-small';
+            backButton.style.marginTop = '20px';
+            backButton.innerHTML = '<span>⬅ Voltar para todas as tarefas</span>';
+            backButton.onclick = () => {
+                state.tasks = originalTasks;
+                loadTasks();
+            };
+            
+            elements.tasksList.appendChild(backButton);
+            
+            // Scroll para tarefas
+            elements.tasksList.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Inicialização
+        async function init() {
+            try {
+                // Verificar saúde do servidor
+                await checkHealth();
+                
+                // Carregar dados iniciais
+                await Promise.all([
+                    loadObjectives(),
+                    loadTasks()
+                ]);
+                
+                showToast('✅ Sistema carregado com sucesso!');
+                
+            } catch (error) {
+                console.error('Erro na inicialização:', error);
+                showToast('❌ Erro ao carregar sistema', true);
+            }
+        }
+
+        // Iniciar quando a página carregar
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Atualizar a cada 30 segundos
+        setInterval(async () => {
+            await loadObjectives();
+            await loadTasks();
+        }, 30000);
+    </script>
+</body>
+</html>
