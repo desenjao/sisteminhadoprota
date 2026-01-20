@@ -1,11 +1,11 @@
 {
   "name": "sisteminhadoprota",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "type": "module",
+  "description": "Sistema completo de emagrecimento via e-mail com gamificação, adaptação inteligente e acompanhamento automatizado.",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -19,14 +19,9 @@
   },
   "homepage": "https://github.com/desenjao/sisteminhadoprota#readme",
   "dependencies": {
-    "@prisma/client": "^6.11.1",
-    "axios": "^1.10.0",
-    "dotenv": "^17.0.1",
-    "express": "^5.1.0",
-    "node-cron": "^4.2.0",
-    "nodemailer": "^7.0.4",
-    "openai": "^6.2.0",
-    "path": "^0.12.7",
-    "prisma": "^6.11.1"
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
   }
 }
