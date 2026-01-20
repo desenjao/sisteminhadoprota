@@ -1,11 +1,16 @@
+// server.js - Sisteminha do Prota com DeepSeek/HuggingFace
 const express = require('express');
 const fs = require('fs').promises;
 const path = require('path');
 const cors = require('cors');
+require('dotenv').config(); // Carregar variáveis de ambiente
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data.json');
+
+// Importar o módulo de IA (que vamos criar)
+const IAGenerator = require('./ia.js');
 
 // Middleware
 app.use(cors());
@@ -46,75 +51,8 @@ async function saveData(data) {
   }
 }
 
-// Simulação de IA (para MVP)
-async function generateTasksWithAI(objective) {
-  // Esta é uma simulação da IA
-  // Em produção, você substituiria por uma chamada real a uma API de IA
-  
-  const tasks = [];
-  const context = `Objetivo: ${objective.title}\nDescrição: ${objective.description}`;
-  
-  // Exemplos de tarefas geradas baseadas no objetivo
-  const exampleTasks = [
-    {
-      id: Date.now() + 1,
-      title: "Analisar o contexto do objetivo",
-      description: "Entender completamente o que precisa ser feito",
-      estimatedTime: 15,
-      status: "pending",
-      objectiveId: objective.id,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: Date.now() + 2,
-      title: "Definir o primeiro passo mínimo",
-      description: "Identificar a menor ação possível para começar",
-      estimatedTime: 10,
-      status: "pending",
-      objectiveId: objective.id,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: Date.now() + 3,
-      title: "Preparar ambiente de trabalho",
-      description: "Organizar o espaço e ferramentas necessárias",
-      estimatedTime: 20,
-      status: "pending",
-      objectiveId: objective.id,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: Date.now() + 4,
-      title: "Executar o primeiro passo",
-      description: "Fazer a primeira ação identificada",
-      estimatedTime: 25,
-      status: "pending",
-      objectiveId: objective.id,
-      createdAt: new Date().toISOString()
-    },
-    {
-      id: Date.now() + 5,
-      title: "Revisar e ajustar",
-      description: "Verificar o progresso e planejar próximo passo",
-      estimatedTime: 15,
-      status: "pending",
-      objectiveId: objective.id,
-      createdAt: new Date().toISOString()
-    }
-  ];
-
-  // Personalizar baseado no título do objetivo
-  if (objective.title.toLowerCase().includes('sisteminha')) {
-    exampleTasks[0].title = "Definir estrutura básica da API";
-    exampleTasks[0].description = "Criar esqueleto do servidor com rotas principais";
-    exampleTasks[1].title = "Configurar banco de dados JSON";
-    exampleTasks[1].description = "Implementar funções de leitura/gravação no arquivo data.json";
-    exampleTasks[2].title = "Implementar rota de criação de objetivos";
-    exampleTasks[2].description = "Criar endpoint POST /objectives";
-  }
-
-  return exampleTasks;
-}
+// Inicializar o gerador de IA
+const iaGenerator = new IAGenerator();
 
 // Página inicial
 app.get('/', (req, res) => {
@@ -229,6 +167,15 @@ app.get('/', (req, res) => {
         opacity: 0.9;
       }
       
+      .ia-status {
+        text-align: center;
+        margin-top: 20px;
+        padding: 15px;
+        background: ${iaGenerator.useRealAI ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 165, 0, 0.1)'};
+        border-radius: 10px;
+        border: 1px solid ${iaGenerator.useRealAI ? '#0f0' : '#ffa500'};
+      }
+      
       @media (max-width: 600px) {
         .container {
           padding: 20px;
@@ -250,6 +197,13 @@ app.get('/', (req, res) => {
         <h1>🧠 Sisteminha do Prota</h1>
         <p class="tagline">Transformando objetivos grandes em pequenas tarefas possíveis</p>
       </header>
+      
+      <div class="ia-status">
+        <strong>🤖 Status da IA:</strong> 
+        ${iaGenerator.useRealAI ? 
+          '✅ DeepSeek (HuggingFace) CONECTADO' : 
+          '⚠️ IA Simulada (adicione HF_TOKEN no .env)'}
+      </div>
       
       <div class="sections">
         <div class="section">
@@ -343,7 +297,8 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'online', 
     message: 'Sisteminha do Prota está funcionando!',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    iaStatus: iaGenerator.useRealAI ? 'DeepSeek (HuggingFace)' : 'IA Simulada'
   });
 });
 
@@ -433,24 +388,44 @@ app.post('/objectives/:id/generate-tasks', async (req, res) => {
       });
     }
     
-    // Gerar tarefas usando a "IA" simulada
-    const generatedTasks = await generateTasksWithAI(objective);
+    // ⭐ ALTERAÇÃO CRÍTICA: Usar o módulo de IA ⭐
+    const generatedTasks = await iaGenerator.generateTasks({
+      title: objective.title,
+      description: objective.description
+    });
     
-    // Atribuir o ID do objetivo a cada tarefa
-    generatedTasks.forEach(task => {
-      task.objectiveId = parseInt(id);
+    // Formatar as tarefas geradas para o formato do sistema
+    const formattedTasks = generatedTasks.map((task, index) => ({
+      id: Date.now() + index + 1,
+      title: task.title,
+      description: task.description,
+      estimatedTime: task.estimatedTime || 15, // Default 15min se não tiver
+      status: "pending",
+      objectiveId: parseInt(id),
+      createdAt: new Date().toISOString()
+    }));
+    
+    // Adicionar as tarefas ao banco de dados
+    formattedTasks.forEach(task => {
       data.tasks.push(task);
     });
     
     await saveData(data);
     
     res.status(201).json({
-      message: `Foram geradas ${generatedTasks.length} tarefas para o objetivo`,
-      tasks: generatedTasks
+      message: `Foram geradas ${formattedTasks.length} tarefas para o objetivo`,
+      tasks: formattedTasks,
+      iaSource: iaGenerator.useRealAI ? 'DeepSeek (HuggingFace)' : 'IA Simulada',
+      objectiveId: parseInt(id)
     });
+    
   } catch (error) {
     console.error('Erro ao gerar tarefas:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      details: error.message,
+      iaSource: iaGenerator.useRealAI ? 'DeepSeek' : 'IA Simulada'
+    });
   }
 });
 
@@ -567,7 +542,8 @@ app.get('/points', async (req, res) => {
     const data = await readData();
     res.json({ 
       points: data.points,
-      message: `Você tem ${data.points} pontos! Continue assim!`
+      message: `Você tem ${data.points} pontos! Continue assim!`,
+      objectivesCompleted: data.tasks.filter(t => t.status === 'done').length
     });
   } catch (error) {
     console.error('Erro ao obter pontuação:', error);
@@ -593,6 +569,8 @@ async function startServer() {
     
     🌐 Acesse: http://localhost:${PORT}
     
+    🤖 Status IA: ${iaGenerator.useRealAI ? 'DeepSeek (HuggingFace) ✅' : 'IA Simulada ⚠️'}
+    
     📊 Rotas disponíveis:
     GET  /                    - Página inicial
     GET  /health             - Status do servidor
@@ -604,6 +582,10 @@ async function startServer() {
     PATCH /tasks/:id/done    - Marcar tarefa como concluída
     PATCH /tasks/:id/undo    - Reverter tarefa
     GET  /points             - Ver pontuação
+    
+    🔧 Configuração IA: ${iaGenerator.useRealAI ? 
+      'HF_TOKEN configurado no .env' : 
+      'Adicione HF_TOKEN no .env para usar DeepSeek'}
     
     💡 Lembrete: O sistema existe para funcionar em dias cansados.
                  Fazer pouco ainda é progresso.

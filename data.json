@@ -1,0 +1,74 @@
+{
+  "objectives": [
+    {
+      "id": 1768915504200,
+      "title": "Criar um blog pessoal",
+      "description": "Quero criar um blog para compartilhar meus aprendizados em programação e desenvolvimento pessoal.",
+      "createdAt": "2026-01-20T13:25:04.200Z",
+      "tasks": []
+    },
+    {
+      "id": 1768915504725,
+      "title": "Aprender a tocar violão",
+      "description": "Sempre quis aprender violão, preciso começar com acordes básicos e músicas simples.",
+      "createdAt": "2026-01-20T13:25:04.725Z",
+      "tasks": []
+    },
+    {
+      "id": 1768915505255,
+      "title": "Organizar finanças pessoais",
+      "description": "Preciso criar um sistema para controlar meus gastos e economizar para viagens.",
+      "createdAt": "2026-01-20T13:25:05.255Z",
+      "tasks": []
+    }
+  ],
+  "tasks": [
+    {
+      "id": 1768915508210,
+      "title": "Analisar o contexto do objetivo",
+      "description": "Entender completamente o que precisa ser feito",
+      "estimatedTime": 15,
+      "status": "pending",
+      "objectiveId": 1768915504200,
+      "createdAt": "2026-01-20T13:25:08.209Z"
+    },
+    {
+      "id": 1768915508211,
+      "title": "Definir o primeiro passo mínimo",
+      "description": "Identificar a menor ação possível para começar",
+      "estimatedTime": 10,
+      "status": "done",
+      "objectiveId": 1768915504200,
+      "createdAt": "2026-01-20T13:25:08.209Z",
+      "completedAt": "2026-01-20T13:25:11.622Z"
+    },
+    {
+      "id": 1768915508212,
+      "title": "Preparar ambiente de trabalho",
+      "description": "Organizar o espaço e ferramentas necessárias",
+      "estimatedTime": 20,
+      "status": "pending",
+      "objectiveId": 1768915504200,
+      "createdAt": "2026-01-20T13:25:08.209Z"
+    },
+    {
+      "id": 1768915508213,
+      "title": "Executar o primeiro passo",
+      "description": "Fazer a primeira ação identificada",
+      "estimatedTime": 25,
+      "status": "pending",
+      "objectiveId": 1768915504200,
+      "createdAt": "2026-01-20T13:25:08.209Z"
+    },
+    {
+      "id": 1768915508214,
+      "title": "Revisar e ajustar",
+      "description": "Verificar o progresso e planejar próximo passo",
+      "estimatedTime": 15,
+      "status": "pending",
+      "objectiveId": 1768915504200,
+      "createdAt": "2026-01-20T13:25:08.209Z"
+    }
+  ],
+  "points": 10
+}
